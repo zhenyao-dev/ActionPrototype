@@ -31,7 +31,9 @@ public class PlayerController : MonoBehaviour
         moveInput = 0f;
 
         if (Keyboard.current == null)
+        {
             return;
+        }
 
         // 左右移动
         if (Keyboard.current.aKey.isPressed ||
@@ -54,11 +56,11 @@ public class PlayerController : MonoBehaviour
             facingDirection = -1;
         }
 
-attackPoint.localPosition = new Vector3(
-    attackOffset * facingDirection,
-    0f,
-    0f
-);
+        attackPoint.localPosition = new Vector3(
+            attackOffset * facingDirection,
+            0f,
+            0f
+        );
 
         // 检查脚底是否碰到 Ground
         isGrounded = Physics2D.OverlapCircle(
