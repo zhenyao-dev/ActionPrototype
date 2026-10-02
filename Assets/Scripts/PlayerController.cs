@@ -15,6 +15,11 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private float moveInput;
     private bool isGrounded;
+    private int facingDirection = 1;
+
+    [Header("Attack")]
+    [SerializeField] private Transform attackPoint;
+    [SerializeField] private float attackOffset = 0.8f;
 
     private void Awake()
     {
@@ -40,6 +45,20 @@ public class PlayerController : MonoBehaviour
         {
             moveInput += 1f;
         }
+        if (moveInput > 0)
+        {
+            facingDirection = 1;
+        }
+        else if (moveInput < 0)
+        {
+            facingDirection = -1;
+        }
+
+attackPoint.localPosition = new Vector3(
+    attackOffset * facingDirection,
+    0f,
+    0f
+);
 
         // 检查脚底是否碰到 Ground
         isGrounded = Physics2D.OverlapCircle(
