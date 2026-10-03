@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -15,11 +16,10 @@ public class PlayerHealth : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
 
-    public int CurrentHealth =>
-        currentHealth;
+    public int CurrentHealth => currentHealth;
+    public int MaxHealth => maxHealth;
 
-    public int MaxHealth =>
-        maxHealth;
+    public event Action<int, int> OnHealthChanged;
 
     private void Awake()
     {
@@ -29,11 +29,14 @@ public class PlayerHealth : MonoBehaviour
             GetComponent<SpriteRenderer>();
     }
 
-    // 返回 true：
-    // 这次真的扣到了血
-    //
-    // 返回 false：
-    // 正处于无敌时间，没有受到伤害
+    private void Start()
+    {
+        OnHealthChanged?.Invoke(
+            currentHealth,
+            maxHealth
+        );
+    }
+
     public bool TakeDamage(int damage)
     {
         if (isInvincible ||
@@ -43,6 +46,16 @@ public class PlayerHealth : MonoBehaviour
         }
 
         currentHealth -= damage;
+
+        // 防止出现负数
+        currentHealth =
+            Mathf.Max(currentHealth, 0);
+
+        // 扣血以后立刻通知 UI
+        OnHealthChanged?.Invoke(
+            currentHealth,
+            maxHealth
+        );
 
         Debug.Log(
             $"Player took {damage} damage. HP: {currentHealth}"
@@ -94,9 +107,7 @@ public class PlayerHealth : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log(
-            "Player defeated."
-        );
+        Debug.Log("Player defeated.");
 
         Destroy(gameObject);
     }
