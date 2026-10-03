@@ -25,6 +25,8 @@ public class PlayerController : MonoBehaviour
 
     private Rigidbody2D rb;
     private Collider2D playerCollider;
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
 
     private float moveInput;
     private bool isGrounded;
@@ -45,6 +47,8 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         playerCollider = GetComponent<Collider2D>();
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
     }
 
     private void Update()
@@ -107,10 +111,39 @@ public class PlayerController : MonoBehaviour
             if (moveInput > 0f)
             {
                 facingDirection = 1;
+
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.flipX = false;
+                }
             }
             else if (moveInput < 0f)
             {
                 facingDirection = -1;
+
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.flipX = true;
+                }
+            }
+
+            // 告诉 Animator 当前的移动 / 跳跃状态
+            if (animator != null)
+            {
+                animator.SetFloat(
+                    "Speed",
+                    Mathf.Abs(moveInput)
+                );
+
+                animator.SetBool(
+                    "IsGrounded",
+                    isGrounded
+                );
+
+                animator.SetFloat(
+                    "YVelocity",
+                    rb.linearVelocity.y
+                );
             }
 
             // 跳跃
