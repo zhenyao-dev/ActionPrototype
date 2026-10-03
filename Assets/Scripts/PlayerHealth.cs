@@ -20,6 +20,7 @@ public class PlayerHealth : MonoBehaviour
     public int MaxHealth => maxHealth;
 
     public event Action<int, int> OnHealthChanged;
+    public event Action OnPlayerDied;
 
     private void Awake()
     {
@@ -47,11 +48,9 @@ public class PlayerHealth : MonoBehaviour
 
         currentHealth -= damage;
 
-        // 防止出现负数
         currentHealth =
             Mathf.Max(currentHealth, 0);
 
-        // 扣血以后立刻通知 UI
         OnHealthChanged?.Invoke(
             currentHealth,
             maxHealth
@@ -108,6 +107,9 @@ public class PlayerHealth : MonoBehaviour
     private void Die()
     {
         Debug.Log("Player defeated.");
+
+        // 先通知 GameOverUI
+        OnPlayerDied?.Invoke();
 
         Destroy(gameObject);
     }
