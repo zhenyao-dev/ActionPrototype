@@ -316,6 +316,7 @@ MonoBehaviour:
     m_Bits: 128
   attackDamage: 1
   attackCooldown: 0.4
+  bodyPushResetDistance: 0.1
 --- !u!1 &212269502
 GameObject:
   m_ObjectHideFlags: 0
@@ -776,6 +777,9 @@ MonoBehaviour:
   hitFlashDuration: 0.1
   knockbackForce: 5
   knockbackUpForce: 2
+  knockbackDuration: 0.15
+  bodyPushDistance: 0.18
+  bodyPushDuration: 0.12
 --- !u!50 &1127669675
 Rigidbody2D:
   serializedVersion: 5
