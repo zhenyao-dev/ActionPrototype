@@ -23,6 +23,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float attackRange = 0.6f;
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private int attackDamage = 1;
+    [SerializeField] private float attackCooldown = 0.4f;
+
+    private float nextAttackTime = 0f;
 
     private void Awake()
     {
@@ -82,9 +85,11 @@ public class PlayerController : MonoBehaviour
         }
 
         // J键攻击
-        if (Keyboard.current.jKey.wasPressedThisFrame)
+        if (Keyboard.current.jKey.wasPressedThisFrame &&
+            Time.time >= nextAttackTime)
         {
             Attack();
+            nextAttackTime = Time.time + attackCooldown;
         }
     }
 
