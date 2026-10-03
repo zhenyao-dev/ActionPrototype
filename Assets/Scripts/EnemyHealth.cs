@@ -5,7 +5,10 @@ public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] private int maxHealth = 3;
     [SerializeField] private float hitFlashDuration = 0.1f;
+    [SerializeField] private float knockbackForce = 5f;
+    [SerializeField] private float knockbackUpForce = 2f;
 
+    private Rigidbody2D rb;
     private int currentHealth;
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
@@ -15,6 +18,7 @@ public class EnemyHealth : MonoBehaviour
         currentHealth = maxHealth;
 
         spriteRenderer = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
 
         if (spriteRenderer != null)
         {
@@ -22,13 +26,26 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(int damage, Vector2 knockbackDirection)
     {
         currentHealth -= damage;
 
         Debug.Log(
             $"{gameObject.name} took {damage} damage. HP: {currentHealth}"
         );
+
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+
+            rb.AddForce(
+                new Vector2(
+                    knockbackDirection.x * knockbackForce,
+                    knockbackUpForce
+                ),
+                ForceMode2D.Impulse
+            );
+        }
 
         if (spriteRenderer != null)
         {

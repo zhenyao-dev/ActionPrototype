@@ -315,6 +315,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 128
   attackDamage: 1
+  attackCooldown: 0.4
 --- !u!1 &212269502
 GameObject:
   m_ObjectHideFlags: 0
@@ -630,6 +631,7 @@ GameObject:
   - component: {fileID: 1127669672}
   - component: {fileID: 1127669671}
   - component: {fileID: 1127669674}
+  - component: {fileID: 1127669675}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
@@ -771,6 +773,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   maxHealth: 3
+  hitFlashDuration: 0.1
+  knockbackForce: 5
+  knockbackUpForce: 2
+--- !u!50 &1127669675
+Rigidbody2D:
+  serializedVersion: 5
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127669670}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDamping: 3
+  m_AngularDamping: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!1 &1948358020
 GameObject:
   m_ObjectHideFlags: 0

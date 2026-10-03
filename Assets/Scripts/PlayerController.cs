@@ -12,11 +12,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
 
-    private Rigidbody2D rb;
-    private float moveInput;
-    private bool isGrounded;
-    private int facingDirection = 1;
-
     [Header("Attack")]
     [SerializeField] private Transform attackPoint;
     [SerializeField] private float attackOffset = 0.8f;
@@ -26,6 +21,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float attackCooldown = 0.4f;
 
     private float nextAttackTime = 0f;
+    private Rigidbody2D rb;
+    private float moveInput;
+    private bool isGrounded;
+    private int facingDirection = 1;
 
     private void Awake()
     {
@@ -115,7 +114,15 @@ public class PlayerController : MonoBehaviour
 
             if (enemyHealth != null)
             {
-                enemyHealth.TakeDamage(attackDamage);
+                Vector2 knockbackDirection = new Vector2(
+                    facingDirection,
+                    0f
+                );
+
+                enemyHealth.TakeDamage(
+                    attackDamage,
+                    knockbackDirection
+                );
             }
         }
     }
