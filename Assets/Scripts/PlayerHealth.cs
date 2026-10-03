@@ -1,18 +1,47 @@
+using System.Collections;
 using UnityEngine;
 
 public class PlayerHealth : MonoBehaviour
 {
+    [Header("Health")]
     [SerializeField] private int maxHealth = 5;
 
+    [Header("Invincibility")]
+    [SerializeField] private float invincibilityDuration = 1f;
+    [SerializeField] private float flashInterval = 0.1f;
+
     private int currentHealth;
+    private bool isInvincible;
+
+    private SpriteRenderer spriteRenderer;
+
+    public int CurrentHealth =>
+        currentHealth;
+
+    public int MaxHealth =>
+        maxHealth;
 
     private void Awake()
     {
         currentHealth = maxHealth;
+
+        spriteRenderer =
+            GetComponent<SpriteRenderer>();
     }
 
-    public void TakeDamage(int damage)
+    // 返回 true：
+    // 这次真的扣到了血
+    //
+    // 返回 false：
+    // 正处于无敌时间，没有受到伤害
+    public bool TakeDamage(int damage)
     {
+        if (isInvincible ||
+            currentHealth <= 0)
+        {
+            return false;
+        }
+
         currentHealth -= damage;
 
         Debug.Log(
@@ -22,12 +51,52 @@ public class PlayerHealth : MonoBehaviour
         if (currentHealth <= 0)
         {
             Die();
+            return true;
         }
+
+        StartCoroutine(
+            Invincibility()
+        );
+
+        return true;
+    }
+
+    private IEnumerator Invincibility()
+    {
+        isInvincible = true;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime <
+               invincibilityDuration)
+        {
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.enabled =
+                    !spriteRenderer.enabled;
+            }
+
+            yield return new WaitForSeconds(
+                flashInterval
+            );
+
+            elapsedTime +=
+                flashInterval;
+        }
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = true;
+        }
+
+        isInvincible = false;
     }
 
     private void Die()
     {
-        Debug.Log("Player defeated.");
+        Debug.Log(
+            "Player defeated."
+        );
 
         Destroy(gameObject);
     }

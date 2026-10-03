@@ -27,19 +27,22 @@ public class EnemyHealth : MonoBehaviour
     private Coroutine bodyPushCoroutine;
     private Coroutine knockbackCoroutine;
 
-    private bool bodyPushLocked = false;
-
     private void Awake()
     {
         currentHealth = maxHealth;
 
         rb = GetComponent<Rigidbody2D>();
-        spriteRenderer = GetComponent<SpriteRenderer>();
+        spriteRenderer =
+            GetComponent<SpriteRenderer>();
 
         if (spriteRenderer != null)
         {
-            originalColor = spriteRenderer.color;
+            originalColor =
+                spriteRenderer.color;
         }
+
+        // Enemy 平时默认锁住 X
+        LockHorizontalMovement();
     }
 
     // -------------------------
@@ -57,28 +60,36 @@ public class EnemyHealth : MonoBehaviour
 
         if (rb != null)
         {
-            // 如果正在进行普通身体推动，
-            // 攻击 Knockback 优先
+            // 攻击优先于普通 Body Push
             if (bodyPushCoroutine != null)
             {
-                StopCoroutine(bodyPushCoroutine);
+                StopCoroutine(
+                    bodyPushCoroutine
+                );
+
                 bodyPushCoroutine = null;
             }
 
             if (knockbackCoroutine != null)
             {
-                StopCoroutine(knockbackCoroutine);
+                StopCoroutine(
+                    knockbackCoroutine
+                );
             }
 
             knockbackCoroutine =
                 StartCoroutine(
-                    Knockback(knockbackDirection)
+                    Knockback(
+                        knockbackDirection
+                    )
                 );
         }
 
         if (spriteRenderer != null)
         {
-            StartCoroutine(HitFlash());
+            StartCoroutine(
+                HitFlash()
+            );
         }
 
         if (currentHealth <= 0)
@@ -92,7 +103,8 @@ public class EnemyHealth : MonoBehaviour
     // -------------------------
     private IEnumerator HitFlash()
     {
-        spriteRenderer.color = Color.red;
+        spriteRenderer.color =
+            Color.red;
 
         yield return new WaitForSeconds(
             hitFlashDuration
@@ -108,9 +120,10 @@ public class EnemyHealth : MonoBehaviour
     private IEnumerator Knockback(
         Vector2 knockbackDirection)
     {
-        // 攻击时暂时允许 Enemy 横向移动
+        // 临时解除 X 锁
         rb.constraints =
-            RigidbodyConstraints2D.FreezeRotation;
+            RigidbodyConstraints2D
+                .FreezeRotation;
 
         rb.linearVelocity =
             new Vector2(
@@ -124,78 +137,78 @@ public class EnemyHealth : MonoBehaviour
             knockbackDuration
         );
 
-        // 停止横向移动
         rb.linearVelocity =
             new Vector2(
                 0f,
                 rb.linearVelocity.y
             );
 
-        // 如果玩家还没有和 Enemy 拉开，攻击结束后继续锁住 X
-        if (bodyPushLocked)
-        {
-            rb.constraints =
-                RigidbodyConstraints2D.FreezePositionX |
-                RigidbodyConstraints2D.FreezeRotation;
-        }
-        else
-        {
-            rb.constraints =
-                RigidbodyConstraints2D.FreezeRotation;
-        }
+        // 攻击结束重新锁住 X
+        LockHorizontalMovement();
 
         knockbackCoroutine = null;
     }
 
     // -------------------------
-    // Player 身体撞击时尝试轻微移动
+    // Player 身体撞击
     // -------------------------
-    public void TryBodyPush(int direction)
+    public bool TryBodyPush(
+        int direction)
     {
         if (rb == null ||
             bodyPushCoroutine != null ||
             knockbackCoroutine != null)
         {
-            return;
+            return false;
         }
 
-        // 从这次身体碰撞开始，Enemy 进入锁定状态
-        bodyPushLocked = true;
+        bodyPushCoroutine =
+            StartCoroutine(
+                BodyPush(direction)
+            );
 
-        bodyPushCoroutine = StartCoroutine(
-            BodyPush(direction)
-        );
+        return true;
     }
 
     // -------------------------
-    // 身体碰撞产生的小幅移动
+    // 身体碰撞的小幅移动
     // -------------------------
-    private IEnumerator BodyPush(int direction)
+    private IEnumerator BodyPush(
+        int direction)
     {
-        float startX = rb.position.x;
+        float startX =
+            rb.position.x;
 
         float targetX =
-            startX + direction * bodyPushDistance;
+            startX +
+            direction *
+            bodyPushDistance;
 
         float elapsedTime = 0f;
 
-        // 推动期间允许横向移动
+        // Body Push 期间临时解除 X
         rb.constraints =
-            RigidbodyConstraints2D.FreezeRotation;
+            RigidbodyConstraints2D
+                .FreezeRotation;
 
-        while (elapsedTime < bodyPushDuration)
+        while (elapsedTime <
+               bodyPushDuration)
         {
-            elapsedTime += Time.fixedDeltaTime;
+            elapsedTime +=
+                Time.fixedDeltaTime;
 
-            float t = Mathf.Clamp01(
-                elapsedTime / bodyPushDuration
-            );
+            float t =
+                Mathf.Clamp01(
+                    elapsedTime /
+                    bodyPushDuration
+                );
 
-            float newX = Mathf.Lerp(
-                startX,
-                targetX,
-                t
-            );
+            float newX =
+                Mathf.Lerp(
+                    startX,
+                    targetX,
+                    t
+                );
 
             rb.MovePosition(
                 new Vector2(
@@ -204,33 +217,60 @@ public class EnemyHealth : MonoBehaviour
                 )
             );
 
-            yield return new WaitForFixedUpdate();
+            yield return
+                new WaitForFixedUpdate();
         }
 
-        rb.linearVelocity = new Vector2(
-            0f,
-            rb.linearVelocity.y
-        );
+        rb.linearVelocity =
+            new Vector2(
+                0f,
+                rb.linearVelocity.y
+            );
 
-        // 推完以后暂时锁住 X
-        rb.constraints =
-            RigidbodyConstraints2D.FreezePositionX |
-            RigidbodyConstraints2D.FreezeRotation;
+        // 挪完以后重新锁住 X
+        LockHorizontalMovement();
 
         bodyPushCoroutine = null;
     }
 
-    public void ReleaseBodyPushLock()
+    // -------------------------
+    // Player 真正离开 Enemy 后
+    // 允许以后再次 Body Push
+    // -------------------------
+    public bool ReleaseBodyPushLock()
     {
-        if (rb == null || knockbackCoroutine != null)
+        if (rb == null)
+        {
+            return false;
+        }
+
+        // 攻击 Knockback 还没结束的话
+        // 暂时不要释放
+        if (knockbackCoroutine != null ||
+            bodyPushCoroutine != null)
+        {
+            return false;
+        }
+
+        // 物理 X 仍然保持锁定。
+        // 下一次 BodyPush 会自己临时解锁。
+        LockHorizontalMovement();
+
+        return true;
+    }
+
+    private void LockHorizontalMovement()
+    {
+        if (rb == null)
         {
             return;
         }
 
-        bodyPushLocked = false;
-
         rb.constraints =
-            RigidbodyConstraints2D.FreezeRotation;
+            RigidbodyConstraints2D
+                .FreezePositionX |
+            RigidbodyConstraints2D
+                .FreezeRotation;
     }
 
     private void Die()

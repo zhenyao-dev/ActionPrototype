@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 163133144}
   - component: {fileID: 163133143}
   - component: {fileID: 163133147}
+  - component: {fileID: 163133148}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -316,7 +317,22 @@ MonoBehaviour:
     m_Bits: 128
   attackDamage: 1
   attackCooldown: 0.4
-  bodyPushResetDistance: 0.1
+  bodyPushCooldown: 0.2
+--- !u!114 &163133148
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 163133142}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03d9f53722339204d90cbaf3540b4f5b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
+  maxHealth: 5
+  invincibilityDuration: 1
+  flashInterval: 0.1
 --- !u!1 &212269502
 GameObject:
   m_ObjectHideFlags: 0
@@ -633,6 +649,7 @@ GameObject:
   - component: {fileID: 1127669671}
   - component: {fileID: 1127669674}
   - component: {fileID: 1127669675}
+  - component: {fileID: 1127669676}
   m_Layer: 7
   m_Name: Enemy
   m_TagString: Untagged
@@ -806,7 +823,22 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 5
+--- !u!114 &1127669676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1127669670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec06308773076954da96e8188dc6f0a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyContactDamage
+  contactDamage: 1
+  knockbackForce: 6
+  knockbackUpForce: 3
 --- !u!1 &1948358020
 GameObject:
   m_ObjectHideFlags: 0

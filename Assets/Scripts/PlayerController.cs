@@ -22,22 +22,24 @@ public class PlayerController : MonoBehaviour
 
     [Header("Body Push")]
     [SerializeField] private float bodyPushCooldown = 0.2f;
-    [SerializeField] private float bodyPushResetDistance = 0.1f;
-
-    private EnemyHealth bodyPushLockedEnemy;
-    private Collider2D bodyPushLockedCollider;
-    private Collider2D playerCollider;
-
-    private int bodyPushDirection;
-    private float bodyPushReadyTime;
 
     private Rigidbody2D rb;
+    private Collider2D playerCollider;
 
     private float moveInput;
     private bool isGrounded;
     private int facingDirection = 1;
 
     private float nextAttackTime = 0f;
+
+    // Body Push 状态
+    private EnemyHealth bodyPushLockedEnemy;
+    private Collider2D bodyPushLockedCollider;
+    private float bodyPushReadyTime;
+
+    // 受伤硬直
+    private bool isHurt;
+    private float hurtEndTime;
 
     private void Awake()
     {
@@ -49,46 +51,12 @@ public class PlayerController : MonoBehaviour
     {
         moveInput = 0f;
 
-        if (Keyboard.current == null)
-        {
-            return;
-        }
-
         // -------------------------
-        // 左右移动输入
+        // 受伤硬直结束
         // -------------------------
-        if (Keyboard.current.aKey.isPressed ||
-            Keyboard.current.leftArrowKey.isPressed)
+        if (isHurt && Time.time >= hurtEndTime)
         {
-            moveInput -= 1f;
-        }
-
-        if (Keyboard.current.dKey.isPressed ||
-            Keyboard.current.rightArrowKey.isPressed)
-        {
-            moveInput += 1f;
-        }
-
-        // -------------------------
-        // 记录角色朝向
-        // -------------------------
-        if (moveInput > 0f)
-        {
-            facingDirection = 1;
-        }
-        else if (moveInput < 0f)
-        {
-            facingDirection = -1;
-        }
-
-        // AttackPoint 跟随朝向切换左右
-        if (attackPoint != null)
-        {
-            attackPoint.localPosition = new Vector3(
-                attackOffset * facingDirection,
-                0f,
-                0f
-            );
+            isHurt = false;
         }
 
         // -------------------------
@@ -104,78 +72,80 @@ public class PlayerController : MonoBehaviour
         }
 
         // -------------------------
-        // 跳跃
+        // AttackPoint 跟随朝向
         // -------------------------
-        if (Keyboard.current.spaceKey.wasPressedThisFrame &&
-            isGrounded)
+        if (attackPoint != null)
         {
-            rb.linearVelocity = new Vector2(
-                rb.linearVelocity.x,
-                jumpForce
+            attackPoint.localPosition = new Vector3(
+                attackOffset * facingDirection,
+                0f,
+                0f
             );
         }
 
         // -------------------------
-        // 攻击
+        // 正常控制
+        // 受伤硬直期间不能操作
         // -------------------------
-        if (Keyboard.current.jKey.wasPressedThisFrame &&
-            Time.time >= nextAttackTime)
+        if (!isHurt && Keyboard.current != null)
         {
-            Attack();
+            // 左
+            if (Keyboard.current.aKey.isPressed ||
+                Keyboard.current.leftArrowKey.isPressed)
+            {
+                moveInput -= 1f;
+            }
 
-            nextAttackTime =
-                Time.time + attackCooldown;
+            // 右
+            if (Keyboard.current.dKey.isPressed ||
+                Keyboard.current.rightArrowKey.isPressed)
+            {
+                moveInput += 1f;
+            }
+
+            // 更新朝向
+            if (moveInput > 0f)
+            {
+                facingDirection = 1;
+            }
+            else if (moveInput < 0f)
+            {
+                facingDirection = -1;
+            }
+
+            // 跳跃
+            if (Keyboard.current.spaceKey.wasPressedThisFrame &&
+                isGrounded)
+            {
+                rb.linearVelocity = new Vector2(
+                    rb.linearVelocity.x,
+                    jumpForce
+                );
+            }
+
+            // J 键攻击
+            if (Keyboard.current.jKey.wasPressedThisFrame &&
+                Time.time >= nextAttackTime)
+            {
+                Attack();
+
+                nextAttackTime =
+                    Time.time + attackCooldown;
+            }
         }
 
-        if (bodyPushLockedEnemy != null &&
-            bodyPushLockedCollider != null)
-        {
-            float horizontalGap;
-
-            if (bodyPushDirection == 1)
-            {
-                // Enemy 在右边
-                horizontalGap =
-                    bodyPushLockedCollider.bounds.min.x -
-                    playerCollider.bounds.max.x;
-            }
-            else
-            {
-                // Enemy 在左边
-                horizontalGap =
-                    playerCollider.bounds.min.x -
-                    bodyPushLockedCollider.bounds.max.x;
-            }
-
-            bool movingAway =
-                (bodyPushDirection == 1 && moveInput < 0f) ||
-                (bodyPushDirection == -1 && moveInput > 0f);
-
-            bool cooldownFinished =
-                Time.time >= bodyPushReadyTime;
-
-            bool farEnough =
-                horizontalGap >= bodyPushResetDistance;
-
-            // 必须：
-            // 1. 冷却结束
-            // 2. 主动往反方向走
-            // 3. 真的拉开距离
-            if (cooldownFinished &&
-                movingAway &&
-                farEnough)
-            {
-                bodyPushLockedEnemy.ReleaseBodyPushLock();
-
-                bodyPushLockedEnemy = null;
-                bodyPushLockedCollider = null;
-                bodyPushDirection = 0;
-            }
-        }
+        // Body Push 的解除检测
+        UpdateBodyPushLock();
     }
 
     private void FixedUpdate()
     {
+        // 受伤硬直期间不能用移动输入覆盖击退速度
+        if (isHurt)
+        {
+            return;
+        }
+
         rb.linearVelocity = new Vector2(
             moveInput * moveSpeed,
             rb.linearVelocity.y
@@ -183,71 +153,154 @@ public class PlayerController : MonoBehaviour
     }
 
     // -------------------------
+    // Player 受到伤害时的击退 + 硬直
+    // -------------------------
+    public void ApplyDamageKnockback(
+        Vector2 velocity,
+        float hurtDuration)
+    {
+        isHurt = true;
+
+        hurtEndTime =
+            Time.time + hurtDuration;
+
+        moveInput = 0f;
+
+        rb.linearVelocity = velocity;
+    }
+
+    // -------------------------
     // 身体撞到 Enemy
     // -------------------------
-    private void OnCollisionEnter2D(Collision2D collision)
+    private void OnCollisionEnter2D(
+        Collision2D collision)
     {
-        // 只处理 Enemy Layer
+        // 受伤被弹飞期间不触发 Body Push
+        if (isHurt)
+        {
+            return;
+        }
+
         if (collision.gameObject.layer !=
             LayerMask.NameToLayer("Enemy"))
         {
             return;
         }
 
-        // 上一次还没真正解除，就不能再次推
+        // 上一次 Body Push 还没解除
         if (bodyPushLockedEnemy != null)
         {
             return;
         }
 
         EnemyHealth enemyHealth =
-            collision.gameObject.GetComponent<EnemyHealth>();
+            collision.gameObject
+                .GetComponent<EnemyHealth>();
 
         if (enemyHealth == null)
         {
             return;
         }
 
-        float horizontalSpeed =
-            rb.linearVelocity.x;
+        // 只接受侧面碰撞
+        bool isSideCollision = false;
 
-        // 必须是真的带着水平速度撞过去
-        if (Mathf.Abs(horizontalSpeed) < 0.1f)
+        foreach (ContactPoint2D contact
+                 in collision.contacts)
+        {
+            if (Mathf.Abs(contact.normal.x) > 0.5f)
+            {
+                isSideCollision = true;
+                break;
+            }
+        }
+
+        if (!isSideCollision)
         {
             return;
         }
 
+        // Enemy 位于 Player 哪一侧
         int direction =
-            horizontalSpeed > 0f ? 1 : -1;
+            collision.transform.position.x >
+            transform.position.x
+            ? 1
+            : -1;
 
-        // 确认 Enemy 位于玩家移动方向前方
-        float enemyDirection =
-            collision.transform.position.x -
-            transform.position.x;
+        // Enemy 当前如果正在 Knockback 等，
+        // TryBodyPush 会返回 false
+        bool started =
+            enemyHealth.TryBodyPush(direction);
 
-        if (enemyDirection * direction <= 0f)
+        if (!started)
         {
             return;
         }
 
-        // 让 Enemy 贴着玩家稍微挪动一点
-        enemyHealth.TryBodyPush(direction);
-
-        // 记录这次已经推过
         bodyPushLockedEnemy = enemyHealth;
 
         bodyPushLockedCollider =
-            collision.gameObject.GetComponent<Collider2D>();
+            collision.collider;
 
-        bodyPushDirection = direction;
-
-        // 只是记录“最早何时允许下一次”
         bodyPushReadyTime =
             Time.time + bodyPushCooldown;
     }
 
     // -------------------------
-    // 攻击判定
+    // 检查是否允许下一次 Body Push
+    // -------------------------
+    private void UpdateBodyPushLock()
+    {
+        if (bodyPushLockedEnemy == null)
+        {
+            bodyPushLockedCollider = null;
+            return;
+        }
+
+        if (bodyPushLockedCollider == null ||
+            playerCollider == null)
+        {
+            bodyPushLockedEnemy = null;
+            bodyPushLockedCollider = null;
+            return;
+        }
+
+        // 冷却还没结束
+        if (Time.time < bodyPushReadyTime)
+        {
+            return;
+        }
+
+        // 直接问 Unity：
+        // Player 和这个 Enemy 现在还碰没碰着
+        bool stillTouching =
+            playerCollider.IsTouching(
+                bodyPushLockedCollider
+            );
+
+        // 还贴着就绝对不能再次推
+        if (stillTouching)
+        {
+            return;
+        }
+
+        bool released =
+            bodyPushLockedEnemy
+                .ReleaseBodyPushLock();
+
+        // Enemy 如果还处于攻击 Knockback，
+        // 本帧解除失败，下帧继续尝试
+        if (!released)
+        {
+            return;
+        }
+
+        bodyPushLockedEnemy = null;
+        bodyPushLockedCollider = null;
+    }
+
+    // -------------------------
+    // 攻击
     // -------------------------
     private void Attack()
     {
@@ -268,24 +321,26 @@ public class PlayerController : MonoBehaviour
             EnemyHealth enemyHealth =
                 enemy.GetComponent<EnemyHealth>();
 
-            if (enemyHealth != null)
+            if (enemyHealth == null)
             {
-                Vector2 knockbackDirection =
-                    new Vector2(
-                        facingDirection,
-                        0f
-                    );
-
-                enemyHealth.TakeDamage(
-                    attackDamage,
-                    knockbackDirection
-                );
+                continue;
             }
+
+            Vector2 knockbackDirection =
+                new Vector2(
+                    facingDirection,
+                    0f
+                );
+
+            enemyHealth.TakeDamage(
+                attackDamage,
+                knockbackDirection
+            );
         }
     }
 
     // -------------------------
-    // Scene 中显示检测范围
+    // Scene 中显示判定范围
     // -------------------------
     private void OnDrawGizmosSelected()
     {
