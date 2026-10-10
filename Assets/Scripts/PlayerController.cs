@@ -162,6 +162,11 @@ public class PlayerController : MonoBehaviour
             {
                 Attack();
 
+                if (animator != null)
+                {
+                    animator.SetTrigger("Attack");
+                }
+
                 nextAttackTime =
                     Time.time + attackCooldown;
             }
