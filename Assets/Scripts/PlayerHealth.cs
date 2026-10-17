@@ -22,12 +22,22 @@ public class PlayerHealth : MonoBehaviour
     public event Action<int, int> OnHealthChanged;
     public event Action OnPlayerDied;
 
+    private Animator animator;
+    private PlayerController playerController;
+    private Rigidbody2D rb;
+
     private void Awake()
     {
         currentHealth = maxHealth;
 
         spriteRenderer =
             GetComponent<SpriteRenderer>();
+        animator =
+            GetComponent<Animator>();
+        playerController =
+            GetComponent<PlayerController>();
+        rb =
+            GetComponent<Rigidbody2D>();
     }
 
     private void Start()
@@ -108,9 +118,28 @@ public class PlayerHealth : MonoBehaviour
     {
         Debug.Log("Player defeated.");
 
-        // 先通知 GameOverUI
+        // 禁止玩家继续操作
+        if (playerController != null)
+        {
+            playerController.enabled = false;
+        }
+
+        // 停止当前移动
+        if (rb != null)
+        {
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        // 播放死亡动画
+        if (animator != null)
+        {
+            animator.SetTrigger("Die");
+        }
+
+        // 通知 GameOverUI
         OnPlayerDied?.Invoke();
 
-        Destroy(gameObject);
+        // 不再 Destroy
+        // 场景 1 秒后会自动重新加载
     }
 }
