@@ -26,6 +26,8 @@ public class PlayerHealth : MonoBehaviour
     private PlayerController playerController;
     private Rigidbody2D rb;
 
+    [SerializeField] private HitEffectController hitEffect;
+
     private void Awake()
     {
         currentHealth = maxHealth;
@@ -77,20 +79,52 @@ public class PlayerHealth : MonoBehaviour
         }
 
         StartCoroutine(
-            Invincibility()
+            HitReaction()
         );
 
         return true;
     }
 
-    private IEnumerator Invincibility()
+    private IEnumerator HitReaction()
     {
+        // 立刻进入无敌状态
         isInvincible = true;
+
+        // 先隐藏角色本体
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = false;
+        }
+
+        // 播放受击特效
+        if (hitEffect != null)
+        {
+            hitEffect.Play();
+
+            yield return new WaitForSeconds(
+                hitEffect.EffectDuration
+            );
+        }
+
+        // 受击特效结束，恢复角色本体
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.enabled = true;
+        }
+
+        // 剩余无敌时间继续闪烁
+        float remainingTime =
+            Mathf.Max(
+                0f,
+                invincibilityDuration -
+                (hitEffect != null
+                    ? hitEffect.EffectDuration
+                    : 0f)
+            );
 
         float elapsedTime = 0f;
 
-        while (elapsedTime <
-               invincibilityDuration)
+        while (elapsedTime < remainingTime)
         {
             if (spriteRenderer != null)
             {
@@ -102,8 +136,7 @@ public class PlayerHealth : MonoBehaviour
                 flashInterval
             );
 
-            elapsedTime +=
-                flashInterval;
+            elapsedTime += flashInterval;
         }
 
         if (spriteRenderer != null)
