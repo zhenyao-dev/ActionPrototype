@@ -27,6 +27,10 @@ public class EnemyHealth : MonoBehaviour
     private Coroutine bodyPushCoroutine;
     private Coroutine knockbackCoroutine;
 
+    public bool IsMovementLocked =>
+        bodyPushCoroutine != null ||
+        knockbackCoroutine != null;
+
     private void Awake()
     {
         currentHealth = maxHealth;
@@ -40,9 +44,6 @@ public class EnemyHealth : MonoBehaviour
             originalColor =
                 spriteRenderer.color;
         }
-
-        // Enemy 平时默认锁住 X
-        LockHorizontalMovement();
     }
 
     // -------------------------
@@ -120,7 +121,7 @@ public class EnemyHealth : MonoBehaviour
     private IEnumerator Knockback(
         Vector2 knockbackDirection)
     {
-        // 临时解除 X 锁
+        // 击退期间由 EnemyHealth 控制移动
         rb.constraints =
             RigidbodyConstraints2D
                 .FreezeRotation;
@@ -142,9 +143,6 @@ public class EnemyHealth : MonoBehaviour
                 0f,
                 rb.linearVelocity.y
             );
-
-        // 攻击结束重新锁住 X
-        LockHorizontalMovement();
 
         knockbackCoroutine = null;
     }
@@ -186,7 +184,7 @@ public class EnemyHealth : MonoBehaviour
 
         float elapsedTime = 0f;
 
-        // Body Push 期间临时解除 X
+        // Body Push 期间由 EnemyHealth 控制移动
         rb.constraints =
             RigidbodyConstraints2D
                 .FreezeRotation;
@@ -227,9 +225,6 @@ public class EnemyHealth : MonoBehaviour
                 rb.linearVelocity.y
             );
 
-        // 挪完以后重新锁住 X
-        LockHorizontalMovement();
-
         bodyPushCoroutine = null;
     }
 
@@ -252,25 +247,7 @@ public class EnemyHealth : MonoBehaviour
             return false;
         }
 
-        // 物理 X 仍然保持锁定。
-        // 下一次 BodyPush 会自己临时解锁。
-        LockHorizontalMovement();
-
         return true;
-    }
-
-    private void LockHorizontalMovement()
-    {
-        if (rb == null)
-        {
-            return;
-        }
-
-        rb.constraints =
-            RigidbodyConstraints2D
-                .FreezePositionX |
-            RigidbodyConstraints2D
-                .FreezeRotation;
     }
 
     private void Die()
