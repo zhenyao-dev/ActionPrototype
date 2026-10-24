@@ -1491,6 +1491,8 @@ MonoBehaviour:
   knockbackDuration: 0.15
   bodyPushDistance: 0.18
   bodyPushDuration: 0.12
+  deathDuration: 1
+  deathUpForce: 2.5
 --- !u!50 &1127669675
 Rigidbody2D:
   serializedVersion: 5
