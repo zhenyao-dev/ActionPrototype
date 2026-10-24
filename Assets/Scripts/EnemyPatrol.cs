@@ -21,6 +21,8 @@ public class EnemyPatrol : MonoBehaviour
     private float wallCheckDistance;
     private float groundCheckDistance;
 
+    private bool canTurn = true;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -96,9 +98,16 @@ public class EnemyPatrol : MonoBehaviour
         }
 
         // 撞墙 or 前面没地面 → 掉头
-        if (wallAhead || !groundAhead)
+        if ((wallAhead || !groundAhead) && canTurn)
         {
             TurnAround();
+            canTurn = false;
+        }
+
+        // 检测恢复正常后，才允许下一次掉头
+        if (!wallAhead && groundAhead)
+        {
+            canTurn = true;
         }
 
         rb.linearVelocity =
