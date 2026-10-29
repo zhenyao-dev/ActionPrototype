@@ -30,8 +30,8 @@ public class PlayerController : MonoBehaviour
 
     private float moveInput;
     private bool isGrounded;
+    public bool IsGrounded => isGrounded;
     private int facingDirection = 1;
-
     private float nextAttackTime = 0f;
 
     // Body Push 状态
