@@ -906,7 +906,7 @@ MonoBehaviour:
   lowerDeadZone: 1.2
   verticalSmoothSpeed: 3
   fallSpeedThreshold: -3
-  fallFollowSpeed: 12
+  fallFollowSpeed: 15
   fallOffsetY: 0.5
   lookDownAmount: 5
   lookDownSmoothSpeed: 5
