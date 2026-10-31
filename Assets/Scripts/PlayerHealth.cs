@@ -85,6 +85,23 @@ public class PlayerHealth : MonoBehaviour
         return true;
     }
 
+    public void Kill()
+    {
+        if (currentHealth <= 0)
+        {
+            return;
+        }
+
+        currentHealth = 0;
+
+        OnHealthChanged?.Invoke(
+            currentHealth,
+            maxHealth
+        );
+
+        Die();
+    }
+
     private IEnumerator HitReaction()
     {
         // 立刻进入无敌状态

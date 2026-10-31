@@ -329,6 +329,7 @@ GameObject:
   - component: {fileID: 163133148}
   - component: {fileID: 163133149}
   - component: {fileID: 163133150}
+  - component: {fileID: 163133151}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -569,6 +570,19 @@ Animation:
   m_AnimatePhysics: 0
   m_UpdateMode: 0
   m_CullingType: 0
+--- !u!114 &163133151
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 163133142}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3523954d12156d74fbdfac660c0f9ebc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FallDeath
+  deathY: -17
 --- !u!1 &212269502
 GameObject:
   m_ObjectHideFlags: 0
