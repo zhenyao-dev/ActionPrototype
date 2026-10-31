@@ -10,8 +10,7 @@ public class EnemyContactDamage : MonoBehaviour
     [SerializeField] private float knockbackUpForce = 3f;
     [SerializeField] private float hurtDuration = 0.25f;
 
-    private void OnCollisionEnter2D(
-        Collision2D collision)
+    private void OnCollisionStay2D(Collision2D collision)
     {
         PlayerHealth playerHealth =
             collision.gameObject
@@ -29,9 +28,7 @@ public class EnemyContactDamage : MonoBehaviour
 
         // 无敌时间内 TakeDamage 会返回 false
         bool damaged =
-            playerHealth.TakeDamage(
-                contactDamage
-            );
+            playerHealth.TakeDamage(contactDamage);
 
         // 没有真的受伤就不击退、不硬直
         if (!damaged)

@@ -53,6 +53,13 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        // 暂停时不处理玩家输入
+        if (Time.timeScale == 0f)
+        {
+            moveInput = 0f;
+            return;
+        }
+
         moveInput = 0f;
 
         // -------------------------
