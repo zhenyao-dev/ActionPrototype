@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 public class Goal : MonoBehaviour
 {
     [SerializeField] private GameObject levelClearText;
+    [SerializeField] private GameObject restartText;
 
     private bool cleared;
 
@@ -66,9 +67,10 @@ public class Goal : MonoBehaviour
 
         // 显示通关文字
         if (levelClearText != null)
-        {
             levelClearText.SetActive(true);
-        }
+
+        if (restartText != null)
+            restartText.SetActive(true);
 
         // 隐藏钻石，但保留 Goal.cs 继续检测 R
         if (spriteRenderer != null)
