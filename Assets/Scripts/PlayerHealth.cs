@@ -27,6 +27,9 @@ public class PlayerHealth : MonoBehaviour
     private Rigidbody2D rb;
 
     [SerializeField] private HitEffectController hitEffect;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip hurtSound;
+    [SerializeField] private AudioClip deathSound;
 
     private void Awake()
     {
@@ -62,6 +65,13 @@ public class PlayerHealth : MonoBehaviour
 
         currentHealth =
             Mathf.Max(currentHealth, 0);
+
+        if (currentHealth > 0 &&
+            audioSource != null &&
+            hurtSound != null)
+        {
+            audioSource.PlayOneShot(hurtSound);
+        }
 
         OnHealthChanged?.Invoke(
             currentHealth,
@@ -166,6 +176,12 @@ public class PlayerHealth : MonoBehaviour
 
     private void Die()
     {
+        if (audioSource != null &&
+            deathSound != null)
+        {
+            audioSource.PlayOneShot(deathSound);
+        }
+
         Debug.Log("Player defeated.");
 
         // 禁止玩家继续操作

@@ -6,6 +6,8 @@ public class Goal : MonoBehaviour
 {
     [SerializeField] private GameObject levelClearText;
     [SerializeField] private GameObject restartText;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip clearSound;
 
     private bool cleared;
 
@@ -52,6 +54,12 @@ public class Goal : MonoBehaviour
         }
 
         cleared = true;
+
+        if (audioSource != null &&
+            clearSound != null)
+        {
+            audioSource.PlayOneShot(clearSound);
+        }
 
         // 停止玩家操作
         playerController.enabled = false;

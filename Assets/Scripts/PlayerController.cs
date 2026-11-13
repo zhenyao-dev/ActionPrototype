@@ -11,6 +11,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private float groundCheckRadius = 0.2f;
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip jumpSound;
 
     [Header("Attack")]
     [SerializeField] private Transform attackPoint;
@@ -19,6 +21,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask enemyLayer;
     [SerializeField] private int attackDamage = 1;
     [SerializeField] private float attackCooldown = 0.4f;
+    [SerializeField] private AudioClip attackSound;
+    [SerializeField] private AudioClip hitSound;
 
     [Header("Body Push")]
     [SerializeField] private float bodyPushCooldown = 0.2f;
@@ -161,6 +165,12 @@ public class PlayerController : MonoBehaviour
                     rb.linearVelocity.x,
                     jumpForce
                 );
+
+                if (audioSource != null &&
+                    jumpSound != null)
+                {
+                    audioSource.PlayOneShot(jumpSound);
+                }
             }
 
             // J 键攻击
@@ -168,6 +178,12 @@ public class PlayerController : MonoBehaviour
                 Time.time >= nextAttackTime)
             {
                 Attack();
+
+                if (audioSource != null &&
+                    attackSound != null)
+                {
+                    audioSource.PlayOneShot(attackSound);
+                }
 
                 if (animator != null)
                 {
@@ -177,10 +193,10 @@ public class PlayerController : MonoBehaviour
                 nextAttackTime =
                     Time.time + attackCooldown;
             }
-        }
 
-        // Body Push 的解除检测
-        UpdateBodyPushLock();
+            // Body Push 的解除检测
+            UpdateBodyPushLock();
+        }
     }
 
     private void FixedUpdate()
@@ -381,6 +397,12 @@ public class PlayerController : MonoBehaviour
                 attackDamage,
                 knockbackDirection
             );
+
+            if (audioSource != null &&
+                hitSound != null)
+            {
+                audioSource.PlayOneShot(hitSound);
+            }
         }
     }
 
