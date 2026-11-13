@@ -4,6 +4,10 @@ A 2D action platformer prototype developed with Unity.
 
 This project was created as a personal game development project to practice Unity, C#, 2D game mechanics, UI design, animation, audio, and level design.
 
+## Download
+
+[Download Windows Build - v0.1.0](https://github.com/zhenyao-dev/ActionPrototype/releases/tag/v0.1.0)
+
 ## Overview
 
 The player explores a 2D platforming level while avoiding hazards and fighting enemies.
