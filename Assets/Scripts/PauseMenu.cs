@@ -1,10 +1,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class PauseMenu : MonoBehaviour
 {
     [SerializeField] private GameObject pausePanel;
+    [SerializeField] private float mainMenuDelay = 0.5f;
 
     private bool isPaused;
 
@@ -55,6 +57,12 @@ public class PauseMenu : MonoBehaviour
     public void ReturnToMainMenu()
     {
         Time.timeScale = 1f;
+        StartCoroutine(ReturnToMainMenuAfterDelay());
+    }
+
+    private IEnumerator ReturnToMainMenuAfterDelay()
+    {
+        yield return new WaitForSeconds(mainMenuDelay);
 
         SceneManager.LoadScene("MainMenu");
     }
